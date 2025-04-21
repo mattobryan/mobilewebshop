@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 npm # Mobile Webshop Application
 
 This is a full-stack mobile webshop application with an Angular frontend and Express/Node.js backend.
@@ -141,3 +142,7 @@ If you encounter MongoDB connection issues:
 1. Check the browser console for any errors
 2. Verify that the backend server is running on port 3000
 3. Check that CORS is properly configured in the backend
+=======
+# mobilewebshop
+Mobile Webshop is an e-commerce platform for selling mobile devices. Admins can add products, set prices, and manage stock. Guests can browse products and prices. Registered users (customers) can add items to their cart and make purchases. Built with Angular, Node.js, and MongoDB.
+>>>>>>> 8c02ccefeac04cc2f803a01b587f87b16df8af60
