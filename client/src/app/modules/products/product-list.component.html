@@ -1,0 +1,33 @@
+<div class="product-container">
+  <app-navbar></app-navbar>
+  <h2>Products</h2>
+  
+  <!-- Loading indicator -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading products...</p>
+  </div>
+  
+  <!-- Error message -->
+  <div *ngIf="error" class="error-message">
+    <p>{{ error }}</p>
+  </div>
+  
+  <!-- Database connection status -->
+  <div class="data-source">
+    <p class="real-data-badge">Connected to MongoDB Database</p>
+  </div>
+  
+  <!-- Product grid -->
+  <div class="product-grid">
+    <div *ngFor="let product of products" class="product-card">
+      <img [src]="product.imageUrl || 'assets/placeholder.jpg'" alt="{{ product.name }}" class="product-image">
+      <div class="product-info">
+        <h3>{{ product.name }}</h3>
+        <p class="price">${{ product.price.toFixed(2) }}</p>
+        <p class="description">{{ product.description }}</p>
+        <button class="add-to-cart">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+</div>

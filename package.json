@@ -1,0 +1,26 @@
+{
+  "name": "mobile-webshop",
+  "version": "1.0.0",
+  "description": "Mobile Webshop Application",
+  "scripts": {
+    "start:server": "cd server && npm run dev",
+    "start:client": "cd client && npm start",
+    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
+    "seed": "cd server && npx ts-node src/seed.ts",
+    "split-mongodb-data": "node split-mongodb-data.js"
+  },
+  "devDependencies": {
+    "@types/express-validator": "^2.20.33",
+    "@types/helmet": "^0.0.48",
+    "@types/morgan": "^1.9.9",
+    "@types/validator": "^13.12.3",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.9"
+  },
+  "dependencies": {
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "mongodb": "^6.15.0",
+    "morgan": "^1.10.0"
+  }
+}
