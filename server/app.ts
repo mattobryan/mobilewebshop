@@ -5,6 +5,9 @@ import morgan from 'morgan';
 import config from './config/config';
 import authRoutes from './routes/auth.routes';
 import productRoutes from './routes/product.routes';
+import orderRoutes from './routes/order.routes';
+import reviewRoutes from './routes/review.routes';
+import paymentRoutes from './routes/payment.routes';
 import AppError from './utils/appError';
 import { Request, Response, NextFunction } from 'express';
 
@@ -33,6 +36,9 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // 404 handler
 app.all('*', (req, res, next) => {

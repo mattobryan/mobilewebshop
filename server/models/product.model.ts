@@ -9,6 +9,8 @@ export interface IProduct extends Document {
   category: 'smartphone' | 'tablet' | 'accessory';
   brand: string;
   imageUrl: string;
+  ratingsAverage: number;
+  ratingsQuantity: number;
   createdBy: IUser['_id'];
   createdAt: Date;
 }
@@ -62,6 +64,17 @@ const productSchema = new Schema<IProduct>({
       },
       message: 'Please provide a valid image URL'
     }
+  },
+  ratingsAverage: {
+    type: Number,
+    default: 0,
+    min: [0, 'Rating must be at least 0'],
+    max: [5, 'Rating cannot be more than 5'],
+    set: (val: number) => Math.round(val * 10) / 10 // Round to 1 decimal place
+  },
+  ratingsQuantity: {
+    type: Number,
+    default: 0
   },
   createdBy: {
     type: Schema.Types.ObjectId,

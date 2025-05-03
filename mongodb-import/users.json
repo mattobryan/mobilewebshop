@@ -1,0 +1,38 @@
+[
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c85"
+    },
+    "username": "admin",
+    "email": "admin@example.com",
+    "password": "$2a$12$q7Xs5DwVrMbHqRRnvRjk5.gy8pkHRsHHaG4OFZwO9LFBUYNrWDT9a",
+    "role": "admin",
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c86"
+    },
+    "username": "customer1",
+    "email": "customer1@example.com",
+    "password": "$2a$12$q7Xs5DwVrMbHqRRnvRjk5.gy8pkHRsHHaG4OFZwO9LFBUYNrWDT9a",
+    "role": "customer",
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c87"
+    },
+    "username": "customer2",
+    "email": "customer2@example.com",
+    "password": "$2a$12$q7Xs5DwVrMbHqRRnvRjk5.gy8pkHRsHHaG4OFZwO9LFBUYNrWDT9a",
+    "role": "customer",
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  }
+]

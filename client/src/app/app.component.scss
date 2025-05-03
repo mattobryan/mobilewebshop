@@ -1,0 +1,43 @@
+/* Global styles */
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Main content styles */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Footer styles */
+.main-footer {
+  background-color: #f8f9fa;
+  padding: 20px 0;
+  margin-top: 40px;
+  border-top: 1px solid #e9ecef;
+}
+
+.main-footer .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.main-footer p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 15px;
+  }
+}

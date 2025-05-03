@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import '../types/express.d'; // Import the express.d.ts file
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model';
 import config from '../config/config';

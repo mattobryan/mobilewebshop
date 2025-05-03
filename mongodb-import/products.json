@@ -1,0 +1,182 @@
+[
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c88"
+    },
+    "name": "iPhone 15 Pro",
+    "description": "The latest iPhone with advanced features including a powerful A17 Pro chip, a stunning Super Retina XDR display, and a professional camera system.",
+    "price": 999.99,
+    "stock": 50,
+    "category": "smartphone",
+    "brand": "Apple",
+    "imageUrl": "https://www.apple.com/newsroom/images/2023/09/apple-unveils-iphone-15-pro-and-iphone-15-pro-max/article/Apple-iPhone-15-Pro-lineup-hero-230912_Full-Bleed-Image.jpg.large.jpg",
+    "createdBy": {
+      "$oid": "60d21b4667d0d8992e610c85"
+    },
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c89"
+    },
+    "name": "Samsung Galaxy S24 Ultra",
+    "description": "Samsung's flagship smartphone with a 6.8-inch Dynamic AMOLED display, 200MP camera, and powerful Snapdragon processor.",
+    "price": 1199.99,
+    "stock": 45,
+    "category": "smartphone",
+    "brand": "Samsung",
+    "imageUrl": "https://images.unsplash.com/photo-1706886319707-2db2f2e4a235",
+    "createdBy": {
+      "$oid": "60d21b4667d0d8992e610c85"
+    },
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c8a"
+    },
+    "name": "Google Pixel 8 Pro",
+    "description": "Google's premium smartphone with an exceptional camera system, clean Android experience, and AI features.",
+    "price": 899.99,
+    "stock": 30,
+    "category": "smartphone",
+    "brand": "Google",
+    "imageUrl": "https://images.unsplash.com/photo-1696448442972-2a04a93d05c2",
+    "createdBy": {
+      "$oid": "60d21b4667d0d8992e610c85"
+    },
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c8b"
+    },
+    "name": "iPad Pro 12.9-inch",
+    "description": "Apple's most powerful tablet with M2 chip, Liquid Retina XDR display, and support for Apple Pencil and Magic Keyboard.",
+    "price": 1099.99,
+    "stock": 25,
+    "category": "tablet",
+    "brand": "Apple",
+    "imageUrl": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0",
+    "createdBy": {
+      "$oid": "60d21b4667d0d8992e610c85"
+    },
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c8c"
+    },
+    "name": "Samsung Galaxy Tab S9 Ultra",
+    "description": "Premium Android tablet with a 14.6-inch AMOLED display, S Pen support, and powerful performance for productivity and entertainment.",
+    "price": 1199.99,
+    "stock": 20,
+    "category": "tablet",
+    "brand": "Samsung",
+    "imageUrl": "https://images.unsplash.com/photo-1589739900243-4b52cd9dd8df",
+    "createdBy": {
+      "$oid": "60d21b4667d0d8992e610c85"
+    },
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c8d"
+    },
+    "name": "AirPods Pro 2",
+    "description": "Apple's premium wireless earbuds with active noise cancellation, spatial audio, and adaptive transparency mode.",
+    "price": 249.99,
+    "stock": 100,
+    "category": "accessory",
+    "brand": "Apple",
+    "imageUrl": "https://images.unsplash.com/photo-1606741965429-8d76ff50bb2e",
+    "createdBy": {
+      "$oid": "60d21b4667d0d8992e610c85"
+    },
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c8e"
+    },
+    "name": "Samsung Galaxy Watch 6",
+    "description": "Advanced smartwatch with health tracking features, sleep monitoring, and seamless integration with Samsung devices.",
+    "price": 299.99,
+    "stock": 75,
+    "category": "accessory",
+    "brand": "Samsung",
+    "imageUrl": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a",
+    "createdBy": {
+      "$oid": "60d21b4667d0d8992e610c85"
+    },
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c8f"
+    },
+    "name": "Apple MagSafe Charger",
+    "description": "Wireless charger that attaches magnetically to iPhone 12 and newer models for efficient charging.",
+    "price": 39.99,
+    "stock": 150,
+    "category": "accessory",
+    "brand": "Apple",
+    "imageUrl": "https://images.unsplash.com/photo-1611672585731-fa10603fb9e0",
+    "createdBy": {
+      "$oid": "60d21b4667d0d8992e610c85"
+    },
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c90"
+    },
+    "name": "Google Pixel Buds Pro",
+    "description": "Premium wireless earbuds with active noise cancellation, long battery life, and seamless Google Assistant integration.",
+    "price": 199.99,
+    "stock": 60,
+    "category": "accessory",
+    "brand": "Google",
+    "imageUrl": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df",
+    "createdBy": {
+      "$oid": "60d21b4667d0d8992e610c85"
+    },
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "60d21b4667d0d8992e610c91"
+    },
+    "name": "OnePlus 12",
+    "description": "Flagship smartphone with Snapdragon 8 Gen 3, Hasselblad camera system, and super-fast charging capabilities.",
+    "price": 799.99,
+    "stock": 40,
+    "category": "smartphone",
+    "brand": "OnePlus",
+    "imageUrl": "https://images.unsplash.com/photo-1682687982501-1e58ab814714",
+    "createdBy": {
+      "$oid": "60d21b4667d0d8992e610c85"
+    },
+    "createdAt": {
+      "$date": "2023-04-21T00:00:00.000Z"
+    }
+  }
+]

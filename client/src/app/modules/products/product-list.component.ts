@@ -1,21 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
-import { NavbarComponent } from './shared/navbar.component';
-import { environment } from '../../../environments/environment';
+import { CartService } from '../../core/services/cart.service';
+import { AuthService } from '../../core/services/auth.service';
 
 interface Product {
-  id: string;
+  _id: string;
   name: string;
-  price: number;
   description: string;
+  price: number;
+  stock: number;
+  category: string;
+  brand: string;
   imageUrl: string;
+  ratingsAverage?: number;
+  ratingsQuantity?: number;
+  createdBy?: string;
+  createdAt?: Date;
 }
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, NavbarComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.scss']
 })
@@ -24,7 +32,11 @@ export class ProductListComponent implements OnInit {
   loading = false;
   error = '';
 
-  constructor(private apiService: ApiService) { }
+  constructor(
+    private apiService: ApiService,
+    private cartService: CartService,
+    private authService: AuthService
+  ) { }
 
   ngOnInit(): void {
     this.loadProducts();
@@ -55,5 +67,17 @@ export class ProductListComponent implements OnInit {
         console.error('Error loading products', error);
       }
     });
+  }
+
+  addToCart(product: any): void {
+    this.cartService.addToCart(product);
+  }
+
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 }

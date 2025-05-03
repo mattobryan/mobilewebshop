@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ApiService } from '../../../../core/services/api.service';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -70,7 +71,8 @@ export class LoginComponent {
 
   constructor(
     private fb: FormBuilder,
-    private apiService: ApiService
+    private authService: AuthService,
+    private router: Router
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -80,15 +82,16 @@ export class LoginComponent {
 
   onSubmit() {
     if (this.loginForm.valid) {
-      const credentials = this.loginForm.value;
-      this.apiService.post('auth/login', credentials).subscribe({
-        next: (response: any) => {
+      const { email, password } = this.loginForm.value;
+      this.authService.login(email, password).subscribe({
+        next: (response) => {
           console.log('Login successful', response);
-          // Handle successful login (e.g., store token, redirect)
+          // Redirect to products page after successful login
+          this.router.navigate(['/products']);
         },
         error: (error) => {
           console.error('Login failed', error);
-          // Handle login error
+          // Handle login error (could add error message display here)
         }
       });
     }
