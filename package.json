@@ -23,6 +23,7 @@
     "@angular/animations": "^19.2.8",
     "@angular/ssr": "^19.2.10",
     "@types/nodemailer": "^6.4.17",
+    "dotenv": "^16.5.0",
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
     "mongodb": "^6.15.0",

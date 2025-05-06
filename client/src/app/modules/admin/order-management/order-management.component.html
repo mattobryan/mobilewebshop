@@ -1,0 +1,261 @@
+<div class="order-management-container">
+    <div class="page-header">
+      <h2>Order Management</h2>
+    </div>
+    
+    <div class="filters">
+      <div class="search-box">
+        <input 
+          type="text" 
+          placeholder="Search by order ID or customer name" 
+          [(ngModel)]="searchQuery"
+          (input)="applyFilters()">
+      </div>
+      
+      <div class="filter-dropdown">
+        <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="all">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="processing">Processing</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      
+      <div class="filter-dropdown">
+        <select [(ngModel)]="paymentFilter" (change)="applyFilters()">
+          <option value="all">All Payment Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="failed">Failed</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="loading" *ngIf="isLoading">Loading orders...</div>
+    
+    <div class="empty-data" *ngIf="!isLoading && filteredOrders.length === 0">
+      <p>No orders found matching your criteria.</p>
+    </div>
+    
+    <div class="orders-table-container" *ngIf="!isLoading && filteredOrders.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Payment</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of filteredOrders">
+            <td>{{ order._id.substring(order._id.length - 8) }}</td>
+            <td>{{ order.user?.username || 'Guest User' }}</td>
+            <td>{{ order.createdAt | date:'short' }}</td>
+            <td>{{ order.items?.length || 0 }}</td>
+            <td>\${{ order.totalAmount?.toFixed(2) }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + order.status">
+                {{ order.status | titlecase }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="'payment-' + order.paymentStatus">
+                {{ order.paymentStatus | titlecase }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button class="view-btn" (click)="viewOrderDetails(order)">View</button>
+              <button class="update-btn" (click)="openUpdateModal(order)">Update</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Order Details Modal -->
+    <div class="modal" *ngIf="showDetailsModal">
+      <div class="modal-content modal-lg">
+        <div class="modal-header">
+          <h3>Order Details</h3>
+          <button class="close-btn" (click)="closeDetailsModal()">×</button>
+        </div>
+        <div class="modal-body" *ngIf="selectedOrder">
+          <div class="order-details-grid">
+            <div class="order-info">
+              <h4>Order Information</h4>
+              <div class="info-row">
+                <span class="label">Order ID:</span>
+                <span class="value">{{ selectedOrder._id }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Date:</span>
+                <span class="value">{{ selectedOrder.createdAt | date:'medium' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Status:</span>
+                <span class="value status-badge" [ngClass]="'status-' + selectedOrder.status">
+                  {{ selectedOrder.status | titlecase }}
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="label">Payment Method:</span>
+                <span class="value">{{ selectedOrder.paymentMethod | titlecase }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Payment Status:</span>
+                <span class="value status-badge" [ngClass]="'payment-' + selectedOrder.paymentStatus">
+                  {{ selectedOrder.paymentStatus | titlecase }}
+                </span>
+              </div>
+              <div class="info-row" *ngIf="selectedOrder.paymentDetails?.transactionId">
+                <span class="label">Transaction ID:</span>
+                <span class="value">{{ selectedOrder.paymentDetails.transactionId }}</span>
+              </div>
+            </div>
+            
+            <div class="customer-info">
+              <h4>Customer Information</h4>
+              <div class="info-row">
+                <span class="label">Name:</span>
+                <span class="value">{{ selectedOrder.user?.username || 'Guest User' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Email:</span>
+                <span class="value">{{ selectedOrder.user?.email || 'N/A' }}</span>
+              </div>
+            </div>
+            
+            <div class="shipping-info">
+              <h4>Shipping Information</h4>
+              <div *ngIf="selectedOrder.shippingAddress">
+                <p>{{ selectedOrder.shippingAddress.name }}</p>
+                <p>{{ selectedOrder.shippingAddress.street }}</p>
+                <p>{{ selectedOrder.shippingAddress.city }}, {{ selectedOrder.shippingAddress.state }} {{ selectedOrder.shippingAddress.postalCode }}</p>
+                <p>{{ selectedOrder.shippingAddress.country }}</p>
+                <p>{{ selectedOrder.shippingAddress.phone }}</p>
+              </div>
+              <div *ngIf="!selectedOrder.shippingAddress">
+                <p>No shipping information available</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="order-items">
+            <h4>Order Items</h4>
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of selectedOrder.items">
+                  <td class="product-cell">
+                    <div class="product-info">
+                      <div class="product-image" *ngIf="item.product?.imageUrl">
+                        <img [src]="item.product?.imageUrl" [alt]="item.product?.name" onerror="this.src='/assets/placeholder.jpg'">
+                      </div>
+                      <div class="product-name">
+                        {{ item.product?.name || 'Product no longer available' }}
+                      </div>
+                    </div>
+                  </td>
+                  <td>\${{ item.price?.toFixed(2) }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>\${{ (item.price * item.quantity).toFixed(2) }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-right">Subtotal:</td>
+                  <td>\${{ selectedOrder.totalAmount?.toFixed(2) }}</td>
+                </tr>
+                <tr>
+                  <td colspan="3" class="text-right">Shipping:</td>
+                  <td>Free</td>
+                </tr>
+                <tr class="total-row">
+                  <td colspan="3" class="text-right">Total:</td>
+                  <td>\${{ selectedOrder.totalAmount?.toFixed(2) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="close-btn" (click)="closeDetailsModal()">Close</button>
+          <button class="update-btn" (click)="openUpdateModal(selectedOrder)">Update Order</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Update Order Modal -->
+    <div class="modal" *ngIf="showUpdateModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Update Order Status</h3>
+          <button class="close-btn" (click)="closeUpdateModal()">×</button>
+        </div>
+        <div class="modal-body" *ngIf="orderToUpdate">
+          <div class="form-group">
+            <label for="orderStatus">Order Status</label>
+            <select id="orderStatus" [(ngModel)]="orderToUpdate.status">
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="paymentStatus">Payment Status</label>
+            <select id="paymentStatus" [(ngModel)]="orderToUpdate.paymentStatus">
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="failed">Failed</option>
+            </select>
+          </div>
+          
+          <div class="form-group" *ngIf="orderToUpdate.paymentStatus === 'paid'">
+            <label for="transactionId">Transaction ID</label>
+            <input type="text" id="transactionId" [(ngModel)]="transactionId">
+          </div>
+          
+          <div class="form-group" *ngIf="orderToUpdate.status === 'shipped'">
+            <label for="trackingNumber">Tracking Number</label>
+            <input type="text" id="trackingNumber" [(ngModel)]="trackingNumber">
+          </div>
+          
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" [(ngModel)]="notes" rows="3" placeholder="Add any notes about this update"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="cancel-btn" (click)="closeUpdateModal()">Cancel</button>
+          <button class="save-btn" (click)="updateOrder()" [disabled]="isUpdating">
+            {{ isUpdating ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="error-container" *ngIf="error">
+      <div class="error-message">{{ error }}</div>
+    </div>
+    
+    <div class="success-container" *ngIf="successMessage">
+      <div class="success-message">{{ successMessage }}</div>
+    </div>
+  </div>

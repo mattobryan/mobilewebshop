@@ -1,0 +1,131 @@
+<div class="admin-dashboard-container">
+    <div class="page-header">
+      <h2>Admin Dashboard</h2>
+    </div>
+  
+    <!-- Stats Cards -->
+    <div class="dashboard-stats">
+      <div class="stat-card orders-icon">
+        <div class="stat-icon"><i class="icon">📦</i></div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats.totalOrders }}</div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+      </div>
+  
+      <div class="stat-card revenue-icon">
+        <div class="stat-icon"><i class="icon">💰</i></div>
+        <div class="stat-content">
+          <div class="stat-value">\${{ stats.totalRevenue.toFixed(2) }}</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+      </div>
+  
+      <div class="stat-card products-icon">
+        <div class="stat-icon"><i class="icon">🛒</i></div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats.totalProducts }}</div>
+          <div class="stat-label">Total Products</div>
+        </div>
+      </div>
+  
+      <div class="stat-card users-icon">
+        <div class="stat-icon"><i class="icon">👤</i></div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats.totalUsers }}</div>
+          <div class="stat-label">Registered Users</div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Orders and Products Sections -->
+    <div class="dashboard-sections">
+      <div class="section-row">
+        <!-- Recent Orders -->
+        <div class="dashboard-section">
+          <div class="section-header">
+            <h3>Recent Orders</h3>
+            <a routerLink="/admin/orders" class="view-all-link">View All</a>
+          </div>
+  
+          <div *ngIf="isLoading.orders">Loading orders...</div>
+          <div *ngIf="!isLoading.orders && recentOrders.length === 0">No recent orders found.</div>
+  
+          <table *ngIf="recentOrders.length > 0" class="data-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of recentOrders">
+                <td>{{ order._id.slice(-8) }}</td>
+                <td>{{ order.user?.username || 'Guest User' }}</td>
+                <td>{{ order.createdAt | date: 'short' }}</td>
+                <td>\${{ order.totalAmount?.toFixed(2) }}</td>
+                <td><span class="status-badge" [ngClass]="'status-' + order.status">{{ order.status | titlecase }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+  
+        <!-- Low Stock Products -->
+        <div class="dashboard-section">
+          <div class="section-header">
+            <h3>Low Stock Products</h3>
+            <a routerLink="/admin/inventory" class="view-all-link">View All</a>
+          </div>
+  
+          <div *ngIf="isLoading.products">Loading products...</div>
+          <div *ngIf="!isLoading.products && lowStockProducts.length === 0">No low stock products found.</div>
+  
+          <table *ngIf="lowStockProducts.length > 0" class="data-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Stock</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of lowStockProducts">
+                <td>{{ product.name }}</td>
+                <td>{{ product.category | titlecase }}</td>
+                <td [ngClass]="{'low-stock': product.stock < 10, 'out-of-stock': product.stock === 0}">{{ product.stock }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Quick Actions -->
+    <div class="dashboard-actions">
+      <div class="action-card" routerLink="/admin/products">
+        <h4>Manage Products</h4>
+        <p>Add, edit, or remove products</p>
+      </div>
+      <div class="action-card" routerLink="/admin/orders">
+        <h4>Manage Orders</h4>
+        <p>View and update order status</p>
+      </div>
+      <div class="action-card" routerLink="/admin/inventory">
+        <h4>Manage Inventory</h4>
+        <p>Update stock levels</p>
+      </div>
+      <div class="action-card" routerLink="/products/create">
+        <h4>Add New Product</h4>
+        <p>Create a new listing</p>
+      </div>
+    </div>
+  
+    <!-- Error Message -->
+    <div class="error-container" *ngIf="error">
+      <p class="error-message">{{ error }}</p>
+    </div>
+  </div>
+  

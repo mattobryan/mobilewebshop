@@ -11,7 +11,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'login',
-        loadComponent: () => import('./modules/auth/login/login/login.component').then(c => c.LoginComponent)
+        loadComponent: () => import('./modules/auth/login/login.component').then(c => c.LoginComponent)
       },
       {
         path: 'register',

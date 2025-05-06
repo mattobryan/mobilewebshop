@@ -1,0 +1,104 @@
+<div class="product-management-container">
+    <div class="page-header">
+      <h2>Product Management</h2>
+      <button class="add-product-btn" routerLink="/products/create">Add New Product</button>
+    </div>
+    
+    <div class="filters">
+      <div class="search-box">
+        <input 
+          type="text" 
+          placeholder="Search by name or brand" 
+          [(ngModel)]="searchQuery"
+          (input)="applyFilters()">
+      </div>
+      
+      <div class="filter-dropdown">
+        <select [(ngModel)]="categoryFilter" (change)="applyFilters()">
+          <option value="all">All Categories</option>
+          <option value="smartphone">Smartphones</option>
+          <option value="tablet">Tablets</option>
+          <option value="accessory">Accessories</option>
+        </select>
+      </div>
+      
+      <div class="filter-dropdown">
+        <select [(ngModel)]="stockFilter" (change)="applyFilters()">
+          <option value="all">All Stock Levels</option>
+          <option value="low">Low Stock (< 10)</option>
+          <option value="out">Out of Stock</option>
+          <option value="in">In Stock</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="loading" *ngIf="isLoading">Loading products...</div>
+    
+    <div class="empty-data" *ngIf="!isLoading && filteredProducts.length === 0">
+      <p>No products found matching your criteria.</p>
+    </div>
+    
+    <div class="products-table-container" *ngIf="!isLoading && filteredProducts.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Brand</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of filteredProducts">
+            <td class="product-image-cell">
+              <img [src]="product.imageUrl" [alt]="product.name" onerror="this.src='/assets/placeholder.jpg'">
+            </td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.brand }}</td>
+            <td>{{ product.category | titlecase }}</td>
+            <td>\${{ product.price.toFixed(2) }}</td>
+            <td [ngClass]="{'low-stock': product.stock < 10, 'out-of-stock': product.stock === 0}">
+              {{ product.stock }}
+            </td>
+            <td class="actions-cell">
+              <button class="view-btn" [routerLink]="['/products', product._id]">View</button>
+              <button class="edit-btn" [routerLink]="['/products/edit', product._id]">Edit</button>
+              <button class="delete-btn" (click)="deleteProduct(product)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" *ngIf="showDeleteModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Confirm Delete</h3>
+          <button class="close-btn" (click)="cancelDelete()">×</button>
+        </div>
+        <div class="modal-body" *ngIf="productToDelete">
+          <p>Are you sure you want to delete the product "{{ productToDelete.name }}"?</p>
+          <p class="warning">This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="cancel-btn" (click)="cancelDelete()">Cancel</button>
+          <button class="confirm-delete-btn" (click)="confirmDelete()" [disabled]="isDeleting">
+            {{ isDeleting ? 'Deleting...' : 'Delete Product' }}
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="error-container" *ngIf="error">
+      <div class="error-message">{{ error }}</div>
+    </div>
+    
+    <div class="success-container" *ngIf="successMessage">
+      <div class="success-message">{{ successMessage }}</div>
+    </div>
+  </div>
+  

@@ -1,0 +1,42 @@
+<!-- inventory-management.component.html -->
+<div class="p-4 space-y-4">
+    <h2 class="text-2xl font-bold mb-2">Inventory Management</h2>
+  
+    <div class="grid md:grid-cols-4 gap-4">
+      <input type="text" class="input" placeholder="Search by name..." (input)="searchInputChanged.next($event.target.value)">
+  
+      <select class="input" [(ngModel)]="filterByCategory" (change)="applyFilters()">
+        <option value="">All Categories</option>
+        <option *ngFor="let c of ['Electronics', 'Clothing', 'Food']" [value]="c">{{ c }}</option>
+      </select>
+  
+      <select class="input" [(ngModel)]="filterByStock" (change)="applyFilters()">
+        <option value="">All Stock Levels</option>
+        <option value="low">Low (&lt; 10)</option>
+        <option value="medium">Medium (10–50)</option>
+        <option value="high">High (&gt; 50)</option>
+      </select>
+  
+      <div class="flex gap-2">
+        <input type="number" class="input w-full" [(ngModel)]="bulkUpdateValue" placeholder="Bulk Qty">
+        <button class="btn btn-primary" (click)="bulkUpdateStock()">Bulk Update</button>
+      </div>
+    </div>
+  
+    <div *ngIf="filteredProducts.length === 0" class="text-gray-500">No products found.</div>
+  
+    <div class="grid md:grid-cols-3 gap-4">
+      <div *ngFor="let product of filteredProducts; trackBy: trackByProductId" class="card p-4 shadow-md">
+        <img [src]="product.imageUrl" (error)="onImgError($event)" alt="product image" class="w-full h-40 object-cover rounded">
+        <h3 class="text-xl font-semibold mt-2">{{ product.name }}</h3>
+        <p class="text-sm text-gray-600">Category: {{ product.category }}</p>
+        <p class="text-sm">Stock: {{ product.stock }}</p>
+  
+        <div class="flex gap-2 mt-2">
+          <input type="number" [(ngModel)]="newStock[product._id]" class="input w-full" placeholder="New stock">
+          <button class="btn btn-secondary" (click)="updateStock(product._id)">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
