@@ -1,372 +1,340 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule],
   template: /* html */ `
-    <div class="admin-dashboard">
-      <h2>Admin Dashboard</h2>
-      
-      <div class="dashboard-nav">
-        <button 
-          class="nav-btn" 
-          [class.active]="activeTab === 'orders'"
-          (click)="setActiveTab('orders')">
-          Orders
-        </button>
-        <button 
-          class="nav-btn" 
-          [class.active]="activeTab === 'customers'"
-          (click)="setActiveTab('customers')">
-          Customers
-        </button>
-        <button 
-          class="nav-btn" 
-          [class.active]="activeTab === 'products'"
-          (click)="setActiveTab('products')">
-          Products
-        </button>
+    <div class="admin-dashboard-container">
+      <div class="page-header">
+        <h2>Admin Dashboard</h2>
       </div>
       
-      <!-- Orders Tab -->
-      <div class="tab-content" *ngIf="activeTab === 'orders'">
-        <div class="tab-header">
-          <h3>All Orders</h3>
-          <div class="filters">
-            <select [(ngModel)]="orderStatusFilter" (change)="applyOrderFilters()">
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-            <select [(ngModel)]="orderPaymentFilter" (change)="applyOrderFilters()">
-              <option value="all">All Payment Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="paid">Paid</option>
-              <option value="failed">Failed</option>
-            </select>
+      <div class="dashboard-stats">
+        <div class="stat-card">
+          <div class="stat-icon orders-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ stats.totalOrders }}</div>
+            <div class="stat-label">Total Orders</div>
           </div>
         </div>
         
-        <div class="loading" *ngIf="isLoadingOrders">Loading orders...</div>
-        
-        <div class="empty-data" *ngIf="!isLoadingOrders && filteredOrders.length === 0">
-          <p>No orders found.</p>
-        </div>
-        
-        <div class="orders-table-container" *ngIf="!isLoadingOrders && filteredOrders.length > 0">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Date</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Payment</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let order of filteredOrders">
-                <td>{{ order._id.substring(order._id.length - 8) }}</td>
-                <td>{{ order.user?.username || 'Unknown' }}</td>
-                <td>{{ order.createdAt | date:'short' }}</td>
-                <td>\${{ order.totalAmount.toFixed(2) }}</td>
-                <td>
-                  <span class="status-badge" [ngClass]="'status-' + order.status">
-                    {{ order.status | titlecase }}
-                  </span>
-                </td>
-                <td>
-                  <span class="status-badge" [ngClass]="'payment-' + order.paymentStatus">
-                    {{ order.paymentStatus | titlecase }}
-                  </span>
-                </td>
-                <td class="actions-cell">
-                  <button class="view-btn" [routerLink]="['/admin/orders', order._id]">View</button>
-                  <button class="update-btn" (click)="openUpdateOrderModal(order)">Update</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      <!-- Customers Tab -->
-      <div class="tab-content" *ngIf="activeTab === 'customers'">
-        <div class="tab-header">
-          <h3>All Customers</h3>
-          <div class="filters">
-            <input 
-              type="text" 
-              placeholder="Search by name or email" 
-              [(ngModel)]="customerSearchQuery"
-              (input)="applyCustomerFilters()">
+        <div class="stat-card">
+          <div class="stat-icon revenue-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">\${{ stats.totalRevenue.toFixed(2) }}</div>
+            <div class="stat-label">Total Revenue</div>
           </div>
         </div>
         
-        <div class="loading" *ngIf="isLoadingCustomers">Loading customers...</div>
-        
-        <div class="empty-data" *ngIf="!isLoadingCustomers && filteredCustomers.length === 0">
-          <p>No customers found.</p>
-        </div>
-        
-        <div class="customers-table-container" *ngIf="!isLoadingCustomers && filteredCustomers.length > 0">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-                <th>Orders</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let customer of filteredCustomers">
-                <td>{{ customer._id.substring(customer._id.length - 8) }}</td>
-                <td>{{ customer.username }}</td>
-                <td>{{ customer.email }}</td>
-                <td>
-                  <span class="role-badge" [ngClass]="'role-' + customer.role">
-                    {{ customer.role | titlecase }}
-                  </span>
-                </td>
-                <td>{{ customer.createdAt | date:'mediumDate' }}</td>
-                <td>{{ customer.orderCount || 0 }}</td>
-                <td class="actions-cell">
-                  <button class="view-btn" (click)="viewCustomerOrders(customer._id)">View Orders</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      <!-- Products Tab -->
-      <div class="tab-content" *ngIf="activeTab === 'products'">
-        <div class="tab-header">
-          <h3>All Products</h3>
-          <div class="filters">
-            <input 
-              type="text" 
-              placeholder="Search by name or brand" 
-              [(ngModel)]="productSearchQuery"
-              (input)="applyProductFilters()">
-            <select [(ngModel)]="productCategoryFilter" (change)="applyProductFilters()">
-              <option value="all">All Categories</option>
-              <option value="smartphone">Smartphones</option>
-              <option value="tablet">Tablets</option>
-              <option value="accessory">Accessories</option>
-            </select>
+        <div class="stat-card">
+          <div class="stat-icon products-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ stats.totalProducts }}</div>
+            <div class="stat-label">Total Products</div>
           </div>
         </div>
         
-        <div class="add-product-btn-container">
-          <button class="add-btn" routerLink="/admin/products/create">Add New Product</button>
-        </div>
-        
-        <div class="loading" *ngIf="isLoadingProducts">Loading products...</div>
-        
-        <div class="empty-data" *ngIf="!isLoadingProducts && filteredProducts.length === 0">
-          <p>No products found.</p>
-        </div>
-        
-        <div class="products-table-container" *ngIf="!isLoadingProducts && filteredProducts.length > 0">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let product of filteredProducts">
-                <td class="product-image-cell">
-                  <img [src]="product.imageUrl" [alt]="product.name" onerror="this.src='/assets/placeholder.jpg'">
-                </td>
-                <td>{{ product.name }}</td>
-                <td>{{ product.category | titlecase }}</td>
-                <td>\${{ product.price.toFixed(2) }}</td>
-                <td [ngClass]="{'low-stock': product.stock < 10}">{{ product.stock }}</td>
-                <td class="actions-cell">
-                  <button class="view-btn" [routerLink]="['/products', product._id]">View</button>
-                  <button class="edit-btn" [routerLink]="['/admin/products/edit', product._id]">Edit</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="stat-card">
+          <div class="stat-icon users-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ stats.totalUsers }}</div>
+            <div class="stat-label">Registered Users</div>
+          </div>
         </div>
       </div>
-    </div>
-    
-    <!-- Order Update Modal -->
-    <div class="modal" *ngIf="showOrderModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Update Order Status</h3>
-          <button class="close-btn" (click)="showOrderModal = false">×</button>
-        </div>
-        <div class="modal-body" *ngIf="selectedOrder">
-          <div class="form-group">
-            <label for="orderStatus">Order Status</label>
-            <select id="orderStatus" [(ngModel)]="selectedOrder.status">
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+      
+      <div class="dashboard-sections">
+        <div class="section-row">
+          <div class="dashboard-section">
+            <div class="section-header">
+              <h3>Recent Orders</h3>
+              <a routerLink="/admin/orders" class="view-all-link">View All</a>
+            </div>
+            
+            <div class="loading" *ngIf="isLoading.orders">Loading orders...</div>
+            
+            <div class="empty-data" *ngIf="!isLoading.orders && recentOrders.length === 0">
+              <p>No recent orders found.</p>
+            </div>
+            
+            <div class="recent-orders" *ngIf="!isLoading.orders && recentOrders.length > 0">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let order of recentOrders">
+                    <td>{{ order._id.substring(order._id.length - 8) }}</td>
+                    <td>{{ order.user?.username || 'Guest User' }}</td>
+                    <td>{{ order.createdAt | date:'short' }}</td>
+                    <td>\${{ order.totalAmount?.toFixed(2) }}</td>
+                    <td>
+                      <span class="status-badge" [ngClass]="'status-' + order.status">
+                        {{ order.status | titlecase }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           
-          <div class="form-group">
-            <label for="paymentStatus">Payment Status</label>
-            <select id="paymentStatus" [(ngModel)]="selectedOrder.paymentStatus">
-              <option value="pending">Pending</option>
-              <option value="paid">Paid</option>
-              <option value="failed">Failed</option>
-            </select>
+          <div class="dashboard-section">
+            <div class="section-header">
+              <h3>Low Stock Products</h3>
+              <a routerLink="/admin/inventory" class="view-all-link">View All</a>
+            </div>
+            
+            <div class="loading" *ngIf="isLoading.products">Loading products...</div>
+            
+            <div class="empty-data" *ngIf="!isLoading.products && lowStockProducts.length === 0">
+              <p>No low stock products found.</p>
+            </div>
+            
+            <div class="low-stock-products" *ngIf="!isLoading.products && lowStockProducts.length > 0">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Stock</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let product of lowStockProducts">
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category | titlecase }}</td>
+                    <td [ngClass]="{'low-stock': product.stock < 10, 'out-of-stock': product.stock === 0}">
+                      {{ product.stock }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          
-          <div class="form-group" *ngIf="selectedOrder.paymentStatus === 'paid'">
-            <label for="transactionId">Transaction ID</label>
-            <input type="text" id="transactionId" [(ngModel)]="transactionId">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="cancel-btn" (click)="showOrderModal = false">Cancel</button>
-          <button class="save-btn" (click)="updateOrder()" [disabled]="isUpdating">
-            {{ isUpdating ? 'Saving...' : 'Save Changes' }}
-          </button>
         </div>
       </div>
-    </div>
-    
-    <div class="error-container" *ngIf="error">
-      <div class="error-message">{{ error }}</div>
+      
+      <div class="dashboard-actions">
+        <div class="action-card" routerLink="/admin/products">
+          <div class="action-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+          </div>
+          <div class="action-content">
+            <h4>Manage Products</h4>
+            <p>Add, edit, or remove products from your store</p>
+          </div>
+        </div>
+        
+        <div class="action-card" routerLink="/admin/orders">
+          <div class="action-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </div>
+          <div class="action-content">
+            <h4>Manage Orders</h4>
+            <p>View and update order status and payment information</p>
+          </div>
+        </div>
+        
+        <div class="action-card" routerLink="/admin/inventory">
+          <div class="action-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+          </div>
+          <div class="action-content">
+            <h4>Manage Inventory</h4>
+            <p>Update stock levels and monitor inventory status</p>
+          </div>
+        </div>
+        
+        <div class="action-card" routerLink="/products/create">
+          <div class="action-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </div>
+          <div class="action-content">
+            <h4>Add New Product</h4>
+            <p>Create a new product listing for your store</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="error-container" *ngIf="error">
+        <div class="error-message">{{ error }}</div>
+      </div>
     </div>
   `,
   styles: [`
-    .admin-dashboard {
+    .admin-dashboard-container {
       max-width: 1200px;
       margin: 20px auto;
       padding: 20px;
     }
+    .page-header {
+      margin-bottom: 30px;
+    }
     h2 {
-      margin-bottom: 20px;
+      margin: 0;
       color: #333;
-      text-align: center;
+      font-size: 28px;
     }
-    .dashboard-nav {
-      display: flex;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #ddd;
+    h3 {
+      margin: 0;
+      color: #333;
+      font-size: 20px;
     }
-    .nav-btn {
-      padding: 12px 20px;
-      background: none;
-      border: none;
-      border-bottom: 3px solid transparent;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.3s;
+    h4 {
+      margin: 0 0 5px 0;
+      color: #333;
+      font-size: 18px;
     }
-    .nav-btn:hover {
-      background-color: #f5f5f5;
+    
+    /* Stats Section */
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
     }
-    .nav-btn.active {
-      border-bottom-color: #2a9d8f;
-      font-weight: bold;
-    }
-    .tab-content {
+    .stat-card {
       background-color: #fff;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       padding: 20px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    .tab-header {
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+    }
+    .orders-icon {
+      background-color: #cce5ff;
+      color: #0d6efd;
+    }
+    .revenue-icon {
+      background-color: #d1e7dd;
+      color: #198754;
+    }
+    .products-icon {
+      background-color: #fff3cd;
+      color: #ffc107;
+    }
+    .users-icon {
+      background-color: #f8d7da;
+      color: #dc3545;
+    }
+    .stat-content {
+      flex: 1;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    /* Dashboard Sections */
+    .dashboard-sections {
+      margin-bottom: 30px;
+    }
+    .section-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 20px;
+    }
+    .dashboard-section {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
     }
-    .tab-header h3 {
-      margin: 0;
-      color: #333;
-    }
-    .filters {
-      display: flex;
-      gap: 10px;
-    }
-    .filters input, .filters select {
-      padding: 8px 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+    .view-all-link {
+      color: #0d6efd;
+      text-decoration: none;
       font-size: 14px;
     }
-    .add-product-btn-container {
-      margin-bottom: 20px;
-      text-align: right;
+    .view-all-link:hover {
+      text-decoration: underline;
     }
-    .add-btn {
-      padding: 10px 16px;
-      background-color: #2a9d8f;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .add-btn:hover {
-      background-color: #218879;
-    }
-    .loading, .empty-data {
-      text-align: center;
-      padding: 40px;
-      font-size: 16px;
-      color: #666;
-    }
+    
+    /* Tables */
     .data-table {
       width: 100%;
       border-collapse: collapse;
     }
     .data-table th, .data-table td {
-      padding: 12px 15px;
+      padding: 10px;
       text-align: left;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #eee;
     }
     .data-table th {
-      background-color: #f5f5f5;
       font-weight: bold;
       color: #333;
     }
-    .data-table tbody tr:hover {
-      background-color: #f9f9f9;
-    }
-    .product-image-cell {
-      width: 80px;
-    }
-    .product-image-cell img {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
-      border-radius: 4px;
-    }
-    .status-badge, .role-badge {
+    .status-badge {
       display: inline-block;
       padding: 4px 8px;
       border-radius: 12px;
@@ -393,404 +361,165 @@ import { ApiService } from '../../core/services/api.service';
       background-color: #f8d7da;
       color: #721c24;
     }
-    .payment-pending {
-      background-color: #fff3cd;
-      color: #856404;
-    }
-    .payment-paid {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    .payment-failed {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-    .role-admin {
-      background-color: #cce5ff;
-      color: #004085;
-    }
-    .role-customer {
-      background-color: #d1e7dd;
-      color: #0f5132;
-    }
     .low-stock {
+      color: #e67e22;
+      font-weight: bold;
+    }
+    .out-of-stock {
       color: #e63946;
       font-weight: bold;
     }
-    .actions-cell {
-      white-space: nowrap;
-    }
-    .actions-cell button {
-      margin-right: 5px;
-      padding: 6px 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: background-color 0.3s;
-    }
-    .view-btn {
-      background-color: #6c757d;
-      color: white;
-    }
-    .view-btn:hover {
-      background-color: #5a6268;
-    }
-    .edit-btn, .update-btn {
-      background-color: #f4a261;
-      color: white;
-    }
-    .edit-btn:hover, .update-btn:hover {
-      background-color: #e08c48;
-    }
     
-    /* Modal Styles */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+    /* Action Cards */
+    .dashboard-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
     }
-    .modal-content {
-      background-color: white;
+    .action-card {
+      background-color: #fff;
       border-radius: 8px;
-      width: 500px;
-      max-width: 90%;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 20px;
-      border-bottom: 1px solid #ddd;
-    }
-    .modal-header h3 {
-      margin: 0;
-      color: #333;
-    }
-    .close-btn {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: #666;
-    }
-    .modal-body {
       padding: 20px;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #555;
-    }
-    .form-group select, .form-group input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-    .modal-footer {
-      padding: 15px 20px;
-      border-top: 1px solid #ddd;
       display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-    .modal-footer button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .action-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    .action-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      color: #0d6efd;
+    }
+    .action-content {
+      flex: 1;
+    }
+    .action-content p {
+      margin: 0;
+      color: #666;
       font-size: 14px;
     }
-    .cancel-btn {
-      background-color: #e9ecef;
-      color: #495057;
-    }
-    .cancel-btn:hover {
-      background-color: #dee2e6;
-    }
-    .save-btn {
-      background-color: #2a9d8f;
-      color: white;
-    }
-    .save-btn:hover:not(:disabled) {
-      background-color: #218879;
-    }
-    .save-btn:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
+    
+    .loading, .empty-data {
+      text-align: center;
+      padding: 20px;
+      color: #666;
     }
     .error-container {
-      max-width: 800px;
-      margin: 20px auto;
+      margin-top: 20px;
       padding: 15px;
       background-color: #f8d7da;
       color: #721c24;
       border-radius: 4px;
     }
+    
     @media (max-width: 768px) {
-      .tab-header {
-        flex-direction: column;
-        align-items: flex-start;
+      .section-row {
+        grid-template-columns: 1fr;
       }
-      .filters {
-        margin-top: 10px;
-        width: 100%;
-      }
-      .data-table {
-        display: block;
-        overflow-x: auto;
+      .dashboard-actions {
+        grid-template-columns: 1fr;
       }
     }
   `]
 })
 export class AdminDashboardComponent implements OnInit {
-  activeTab = 'orders';
+  stats = {
+    totalOrders: 0,
+    totalRevenue: 0,
+    totalProducts: 0,
+    totalUsers: 0
+  };
   
-  // Orders
-  orders: any[] = [];
-  filteredOrders: any[] = [];
-  isLoadingOrders = true;
-  orderStatusFilter = 'all';
-  orderPaymentFilter = 'all';
+  recentOrders: any[] = [];
+  lowStockProducts: any[] = [];
   
-  // Customers
-  customers: any[] = [];
-  filteredCustomers: any[] = [];
-  isLoadingCustomers = true;
-  customerSearchQuery = '';
-  
-  // Products
-  products: any[] = [];
-  filteredProducts: any[] = [];
-  isLoadingProducts = true;
-  productSearchQuery = '';
-  productCategoryFilter = 'all';
-  
-  // Order update modal
-  showOrderModal = false;
-  selectedOrder: any = null;
-  transactionId = '';
-  isUpdating = false;
+  isLoading = {
+    stats: true,
+    orders: true,
+    products: true
+  };
   
   error: string | null = null;
 
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
-    this.loadOrders();
+    this.loadDashboardData();
   }
 
-  setActiveTab(tab: string): void {
-    this.activeTab = tab;
+  loadDashboardData(): void {
+    this.loadStats();
+    this.loadRecentOrders();
+    this.loadLowStockProducts();
+  }
+
+  loadStats(): void {
+    this.isLoading.stats = true;
     
-    // Load data for the selected tab if not already loaded
-    if (tab === 'orders' && this.orders.length === 0) {
-      this.loadOrders();
-    } else if (tab === 'customers' && this.customers.length === 0) {
-      this.loadCustomers();
-    } else if (tab === 'products' && this.products.length === 0) {
-      this.loadProducts();
-    }
+    this.apiService.get('admin/dashboard/stats').subscribe({
+      next: (response: any) => {
+        if (response && response.data) {
+          this.stats = response.data;
+        }
+        this.isLoading.stats = false;
+      },
+      error: (err) => {
+        console.error('Error loading dashboard stats:', err);
+        this.error = 'Failed to load dashboard statistics.';
+        this.isLoading.stats = false;
+      }
+    });
   }
 
-  // Orders methods
-  loadOrders(): void {
-    this.isLoadingOrders = true;
-    this.error = null;
-
-    this.apiService.get('orders').subscribe({
+  loadRecentOrders(): void {
+    this.isLoading.orders = true;
+    
+    this.apiService.get('orders?limit=5').subscribe({
       next: (response: any) => {
         if (response && response.data && response.data.orders) {
-          this.orders = response.data.orders;
-          // Sort orders by date (newest first)
-          this.orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          this.filteredOrders = [...this.orders];
+          this.recentOrders = response.data.orders;
         } else {
-          this.orders = [];
-          this.filteredOrders = [];
+          this.recentOrders = [];
         }
-        this.isLoadingOrders = false;
+        this.isLoading.orders = false;
       },
       error: (err) => {
-        console.error('Error loading orders:', err);
-        this.error = 'Failed to load orders. Please try again later.';
-        this.isLoadingOrders = false;
+        console.error('Error loading recent orders:', err);
+        this.error = 'Failed to load recent orders.';
+        this.isLoading.orders = false;
       }
     });
   }
 
-  applyOrderFilters(): void {
-    this.filteredOrders = this.orders.filter(order => {
-      // Apply status filter
-      if (this.orderStatusFilter !== 'all' && order.status !== this.orderStatusFilter) {
-        return false;
-      }
-      
-      // Apply payment filter
-      if (this.orderPaymentFilter !== 'all' && order.paymentStatus !== this.orderPaymentFilter) {
-        return false;
-      }
-      
-      return true;
-    });
-  }
-
-  openUpdateOrderModal(order: any): void {
-    this.selectedOrder = { ...order };
-    this.transactionId = order.paymentDetails?.transactionId || '';
-    this.showOrderModal = true;
-  }
-
-  updateOrder(): void {
-    if (!this.selectedOrder) return;
+  loadLowStockProducts(): void {
+    this.isLoading.products = true;
     
-    this.isUpdating = true;
-    this.error = null;
-    
-    // Update order status
-    this.apiService.patch(`orders/${this.selectedOrder._id}/status`, {
-      status: this.selectedOrder.status
-    }).subscribe({
-      next: () => {
-        // Update payment status
-        this.apiService.patch(`orders/${this.selectedOrder._id}/payment`, {
-          paymentStatus: this.selectedOrder.paymentStatus,
-          transactionId: this.selectedOrder.paymentStatus === 'paid' ? this.transactionId : undefined
-        }).subscribe({
-          next: () => {
-            // Update the order in the list
-            const index = this.orders.findIndex(o => o._id === this.selectedOrder._id);
-            if (index !== -1) {
-              this.orders[index].status = this.selectedOrder.status;
-              this.orders[index].paymentStatus = this.selectedOrder.paymentStatus;
-              if (this.selectedOrder.paymentStatus === 'paid' && this.transactionId) {
-                this.orders[index].paymentDetails = {
-                  ...this.orders[index].paymentDetails,
-                  transactionId: this.transactionId
-                };
-              }
-              this.applyOrderFilters();
-            }
-            
-            this.showOrderModal = false;
-            this.isUpdating = false;
-          },
-          error: (err) => {
-            console.error('Error updating payment status:', err);
-            this.error = err.error?.message || 'Failed to update payment status. Please try again.';
-            this.isUpdating = false;
-          }
-        });
-      },
-      error: (err) => {
-        console.error('Error updating order status:', err);
-        this.error = err.error?.message || 'Failed to update order status. Please try again.';
-        this.isUpdating = false;
-      }
-    });
-  }
-
-  // Customers methods
-  loadCustomers(): void {
-    this.isLoadingCustomers = true;
-    this.error = null;
-
-    this.apiService.get('auth/users').subscribe({
-      next: (response: any) => {
-        if (response && response.data && response.data.users) {
-          this.customers = response.data.users;
-          this.filteredCustomers = [...this.customers];
-        } else {
-          this.customers = [];
-          this.filteredCustomers = [];
-        }
-        this.isLoadingCustomers = false;
-      },
-      error: (err) => {
-        console.error('Error loading customers:', err);
-        this.error = 'Failed to load customers. Please try again later.';
-        this.isLoadingCustomers = false;
-      }
-    });
-  }
-
-  applyCustomerFilters(): void {
-    if (!this.customerSearchQuery) {
-      this.filteredCustomers = [...this.customers];
-      return;
-    }
-    
-    const query = this.customerSearchQuery.toLowerCase();
-    this.filteredCustomers = this.customers.filter(customer => {
-      return (
-        customer.username.toLowerCase().includes(query) ||
-        customer.email.toLowerCase().includes(query)
-      );
-    });
-  }
-
-  viewCustomerOrders(customerId: string): void {
-    // This would typically navigate to a customer detail page
-    // For now, we'll just filter the orders tab to show only this customer's orders
-    this.activeTab = 'orders';
-    this.filteredOrders = this.orders.filter(order => order.user?._id === customerId);
-  }
-
-  // Products methods
-  loadProducts(): void {
-    this.isLoadingProducts = true;
-    this.error = null;
-
-    this.apiService.get('products').subscribe({
+    this.apiService.get('products?stock=low&limit=5').subscribe({
       next: (response: any) => {
         if (response && response.data && response.data.products) {
-          this.products = response.data.products;
-          this.filteredProducts = [...this.products];
+          this.lowStockProducts = response.data.products.filter((product: any) => product.stock < 10)
+            .sort((a: any, b: any) => a.stock - b.stock);
         } else {
-          this.products = [];
-          this.filteredProducts = [];
+          this.lowStockProducts = [];
         }
-        this.isLoadingProducts = false;
+        this.isLoading.products = false;
       },
       error: (err) => {
-        console.error('Error loading products:', err);
-        this.error = 'Failed to load products. Please try again later.';
-        this.isLoadingProducts = false;
+        console.error('Error loading low stock products:', err);
+        this.error = 'Failed to load low stock products.';
+        this.isLoading.products = false;
       }
-    });
-  }
-
-  applyProductFilters(): void {
-    this.filteredProducts = this.products.filter(product => {
-      // Apply category filter
-      if (this.productCategoryFilter !== 'all' && product.category !== this.productCategoryFilter) {
-        return false;
-      }
-      
-      // Apply search filter
-      if (this.productSearchQuery) {
-        const query = this.productSearchQuery.toLowerCase();
-        return (
-          product.name.toLowerCase().includes(query) ||
-          product.brand.toLowerCase().includes(query)
-        );
-      }
-      
-      return true;
     });
   }
 }

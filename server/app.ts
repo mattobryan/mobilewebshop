@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import mongoose from 'mongoose';
 import config from './config/config';
 import authRoutes from './routes/auth.routes';
 import productRoutes from './routes/product.routes';
@@ -10,6 +11,11 @@ import reviewRoutes from './routes/review.routes';
 import paymentRoutes from './routes/payment.routes';
 import AppError from './utils/appError';
 import { Request, Response, NextFunction } from 'express';
+
+// Connect to MongoDB
+mongoose.connect(config.mongoose.url, config.mongoose.options)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 const app = express();
 
