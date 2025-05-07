@@ -1,24 +1,22 @@
 import { Routes } from '@angular/router';
 import { CartComponent } from './modules/cart/cart.component';
 import { OrderHistoryComponent } from './modules/orders/order-history.component';
-import { AdminDashboardComponent } from './modules/admin/admin-dashboard.component';
+import { AdminDashboardComponent } from './modules/admin/admin-dashboard/admin-dashboard.component';
 import { isAuthenticated } from './core/guards/auth.guard';
 import { isAdmin } from './core/guards/admin.guard';
+import { AuthComponent } from './modules/auth/auth.component';
+
 
 export const routes: Routes = [
   {
-    path: 'auth',
+    path: '',
+    component: AuthComponent,
     children: [
-      {
-        path: 'login',
-        loadComponent: () => import('./modules/auth/login/login.component').then(c => c.LoginComponent)
-      },
-      {
-        path: 'register',
-        loadComponent: () => import('./modules/auth/register/register.component').then(c => c.RegisterComponent)
-      }
+      { path: 'login', component: AuthComponent },
+      { path: 'register', component: AuthComponent },
     ]
-  },
+    },
+    
   {
     path: 'products',
     children: [
@@ -54,7 +52,7 @@ export const routes: Routes = [
   },
   {
     path: 'order-confirmation',
-    loadComponent: () => import('./modules/checkout/order-confirmation.component').then(c => c.OrderConfirmationComponent),
+    loadComponent: () => import('./modules/order-confirmation/order-confirmation.component').then(c => c.OrderConfirmationComponent),
     canActivate: [isAuthenticated]
   },
   {
@@ -77,17 +75,17 @@ export const routes: Routes = [
       },
       {
         path: 'products',
-        loadComponent: () => import('./modules/admin/product-management.component').then(c => c.ProductManagementComponent),
+        loadComponent: () => import('./modules/admin/product-management/product-management.component').then(c => c.ProductManagementComponent),
         canActivate: [isAuthenticated, isAdmin]
       },
       {
         path: 'orders',
-        loadComponent: () => import('./modules/admin/order-management.component').then(c => c.OrderManagementComponent),
+        loadComponent: () => import('./modules/admin/order-management/order-management.component').then(c => c.OrderManagementComponent),
         canActivate: [isAuthenticated, isAdmin]
       },
       {
         path: 'inventory',
-        loadComponent: () => import('./modules/admin/inventory-management.component').then(c => c.InventoryManagementComponent),
+        loadComponent: () => import('./modules/admin/inventory-management/inventory-management.component').then(c => c.InventoryManagementComponent),
         canActivate: [isAuthenticated, isAdmin]
       }
     ]

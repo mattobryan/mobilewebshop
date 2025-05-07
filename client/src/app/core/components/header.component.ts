@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { CartService } from '../services/cart.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -22,8 +22,8 @@ import { Observable } from 'rxjs';
             
             <!-- Guest Links -->
             <ng-container *ngIf="!isLoggedIn">
-              <li><a routerLink="/auth/login" routerLinkActive="active">Login</a></li>
-              <li><a routerLink="/auth/register" routerLinkActive="active">Register</a></li>
+              <li><a routerLink="/auth/auth" routerLinkActive="active">Login</a></li>
+              <li><a routerLink="/auth/auth" routerLinkActive="active">Register</a></li>
             </ng-container>
             
             <!-- Customer Links -->
@@ -222,11 +222,14 @@ import { Observable } from 'rxjs';
     }
   `]
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   isAdmin = false;
   mobileMenuOpen = false;
   cartItemCount$: Observable<number>;
+
+  // Track subscriptions to prevent memory leaks
+  private authSubscription: Subscription | null = null;
 
   constructor(
     private authService: AuthService,
@@ -238,10 +241,18 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     this.updateAuthStatus();
     
-    // Subscribe to auth changes
-    this.authService.currentUser$.subscribe(() => {
+    // Subscribe to auth changes with proper subscription management
+    this.authSubscription = this.authService.currentUser$.subscribe(() => {
       this.updateAuthStatus();
     });
+  }
+
+  ngOnDestroy(): void {
+    // Clean up subscriptions to prevent memory leaks
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+      this.authSubscription = null;
+    }
   }
 
   updateAuthStatus(): void {

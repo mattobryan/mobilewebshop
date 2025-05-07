@@ -1,0 +1,18 @@
+<div class="confirmation-container">
+    <div class="confirmation-header">...</div>
+  
+    <div *ngIf="!loading && !error">
+      <div class="order-details" *ngIf="order"> ... </div>
+    </div>
+  
+    <div class="loading" *ngIf="loading">
+      <p>Loading order details...</p>
+    </div>
+  
+    <div class="error-container" *ngIf="error">
+      <div class="error-message">{{ error }}</div>
+    </div>
+  
+    <div class="actions"> ... </div>
+  </div>
+  

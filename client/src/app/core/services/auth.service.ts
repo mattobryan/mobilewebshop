@@ -4,19 +4,30 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+
 
 interface AuthResponse {
   status: string;
   token: string;
+  refreshToken: string;
   data: {
     user: {
       id: string;
       username: string;
       email: string;
       role: string;
+      imageUrl?: string;
+      createdAt?: Date;
+      createdBy?: string;
+      ratingsAverage?: number;
+      ratingsQuantity?: number;
+      stock?: number;
     }
-  }
+  };
 }
+
 
 interface DecodedToken {
   id: string;
@@ -29,6 +40,46 @@ interface DecodedToken {
   providedIn: 'root'
 })
 export class AuthService {
+  getUserRole(): string | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.role : null;
+  }
+  getUserId(): string | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.id : null;
+  }
+  getUserName(): string | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.username : null;
+  }
+  getUserEmail(): string | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.email : null;
+  }
+  getUserImage(): string | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.imageUrl : null;
+  }
+  getUserCreatedAt(): Date | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.createdAt : null;
+  }
+  getUserCreatedBy(): string | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.createdBy : null;
+  }
+  getUserRatingsAverage(): number | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.ratingsAverage : null;
+  }
+  getUserRatingsQuantity(): number | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.ratingsQuantity : null;
+  }
+  getUserStock(): number | null {
+    const currentUser = this.currentUserSubject.value;
+    return currentUser ? currentUser.stock : null;
+  }
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'user_data';
   private currentUserSubject = new BehaviorSubject<any>(null);
@@ -38,7 +89,9 @@ export class AuthService {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private httpClient: HttpClient 
+
   ) {
     // Only load stored auth if running in browser
     if (isPlatformBrowser(this.platformId)) {
@@ -50,28 +103,40 @@ export class AuthService {
    * Load stored authentication data from localStorage on service initialization
    */
   private loadStoredAuth(): void {
-    // This method should only be called in browser environment
-    const token = localStorage?.getItem(this.TOKEN_KEY);
-    const userData = localStorage?.getItem(this.USER_KEY);
-    
-    if (token && userData) {
-      const user = JSON.parse(userData);
-      this.currentUserSubject.next(user);
+    try {
+      // This method should only be called in browser environment
+      const token = this.getCookie('auth_token'); // Try to get token from HttpOnly cookie
+      const userData = localStorage?.getItem(this.USER_KEY); // Get user data from localStorage if available
       
-      // Check if token is expired
-      const decodedToken = this.getDecodedToken();
-      if (decodedToken && decodedToken.exp) {
-        const expirationDate = new Date(decodedToken.exp * 1000);
-        if (expirationDate > new Date()) {
-          // Set auto logout timer
-          this.autoLogout(expirationDate);
-        } else {
-          // Token expired, logout
-          this.logout();
+      if (token && userData) {
+        try {
+          const user = JSON.parse(userData);
+          this.currentUserSubject.next(user);
+  
+          // Decode and validate token if available
+          const decodedToken = this.getDecodedToken(); // Make sure to use the cookie token here
+          if (decodedToken && decodedToken.exp) {
+            const expirationDate = new Date(decodedToken.exp * 1000);
+            if (expirationDate > new Date()) {
+              // Set auto logout timer based on the token's expiration date
+              this.autoLogout(expirationDate);
+            } else {
+              // Token expired, log out
+              console.log('Token expired, logging out');
+              this.logout();
+            }
+          }
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          this.logout(); // Clear invalid data
         }
       }
+    } catch (error) {
+      console.error('Error loading stored auth:', error);
+      this.currentUserSubject.next(null); // Prevent app from becoming unresponsive
     }
   }
+  
 
   /**
    * Login user with email and password
@@ -107,6 +172,9 @@ export class AuthService {
         })
       );
   }
+  googleLogin(idToken: string): Observable<any> {
+    return this.http.post('/api/google-login', { idToken });
+  }
 
   /**
    * Handle authentication response
@@ -136,11 +204,10 @@ export class AuthService {
    * Logout the current user
    */
   logout(): void {
-    // Clear stored data (only in browser)
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem(this.TOKEN_KEY);
-      localStorage.removeItem(this.USER_KEY);
-    }
+    // Clear HttpOnly cookie (requires server-side support)
+    this.deleteCookie('auth_token');
+    localStorage.removeItem(this.USER_KEY);
+    this.currentUserSubject.next(null);
     
     // Reset current user
     this.currentUserSubject.next(null);
@@ -154,17 +221,55 @@ export class AuthService {
     // Redirect to login page
     this.router.navigate(['/login']);
   }
+  private setCookie(name: string, value: string, expiresIn: number = 3600): void {
+    const d = new Date();
+    d.setTime(d.getTime() + expiresIn * 1000);
+    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;HttpOnly`;
+  }
+
+  private getCookie(name: string): string | null {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  private deleteCookie(name: string): void {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;Secure;HttpOnly`;
+  }
+
+ 
 
   /**
    * Set a timer to automatically logout when token expires
    * @param expirationDate Token expiration date
    */
   private autoLogout(expirationDate: Date): void {
-    const expiresIn = expirationDate.getTime() - new Date().getTime();
-    
-    this.tokenExpirationTimer = setTimeout(() => {
-      this.logout();
-    }, expiresIn);
+    try {
+      const expiresIn = expirationDate.getTime() - new Date().getTime();
+      
+      // Clear any existing timer
+      if (this.tokenExpirationTimer) {
+        clearTimeout(this.tokenExpirationTimer);
+      }
+      
+      // Set a reasonable maximum timeout (24 hours)
+      const maxTimeout = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+      const timeoutValue = Math.min(expiresIn, maxTimeout);
+      
+      console.log(`Setting auto logout timer for ${timeoutValue / 1000} seconds`);
+      
+      this.tokenExpirationTimer = setTimeout(() => {
+        console.log('Auto logout timer triggered');
+        this.logout();
+      }, timeoutValue);
+    } catch (error) {
+      console.error('Error setting auto logout timer:', error);
+    }
   }
 
   /**
@@ -186,6 +291,8 @@ export class AuthService {
         return jwtDecode<DecodedToken>(token);
       } catch (error) {
         console.error('Error decoding token:', error);
+        // If token can't be decoded, it's invalid - logout
+        this.logout();
         return null;
       }
     }

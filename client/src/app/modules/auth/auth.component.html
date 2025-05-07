@@ -1,0 +1,61 @@
+<div class="auth-wrapper">
+  <div class="auth-card animate-fade-in">
+    <h2>{{ mode === 'login' ? 'Welcome Back!' : 'Create an Account' }}</h2>
+
+    <form [formGroup]="mode === 'login' ? loginForm : registerForm" (ngSubmit)="onSubmit()">
+      <div *ngIf="mode === 'register'" class="form-group">
+        <label for="name">Name</label>
+        <input id="name" type="text" formControlName="name" placeholder="Your Name">
+        <div *ngIf="registerControls['name']?.touched && registerControls['name']?.invalid" class="error-message">
+          Name is required.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="you@example.com">
+        <div *ngIf="(mode === 'login' ? loginControls['email'] : registerControls['email'])?.touched &&
+                    (mode === 'login' ? loginControls['email'] : registerControls['email'])?.invalid"
+             class="error-message">
+          Valid email is required.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="••••••••">
+        <div *ngIf="(mode === 'login' ? loginControls['password'] : registerControls['password'])?.touched &&
+                    (mode === 'login' ? loginControls['password'] : registerControls['password'])?.invalid"
+             class="error-message">
+          Password is required (min 6 characters for registration).
+        </div>
+      </div>
+
+      <div *ngIf="mode === 'register'" class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Re-type Password">
+        <div *ngIf="registerControls['confirmPassword']?.touched && registerControls['confirmPassword']?.errors?.['passwordMismatch']"
+             class="error-message">
+          Passwords do not match.
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message center">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="(mode === 'login' ? loginForm.invalid : registerForm.invalid)">
+        {{ mode === 'login' ? 'Login' : 'Register' }}
+      </button>
+    </form>
+
+    <div class="divider">OR</div>
+
+    <button class="btn-google" (click)="onGoogleLogin()">
+      <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" />
+      Continue with Google
+    </button>
+
+    <div class="switch-mode">
+      <p>
+        {{ mode === 'login' ? "Don't have an account?" : 'Already registered?' }}

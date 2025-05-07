@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { OrderManagementService } from './order-management.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-order-management',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, FormsModule],
   templateUrl: './order-management.component.html',
-  styleUrls: ['./order-management.component.css']
+  styleUrls: ['./order-management.component.scss']
 })
 export class OrderManagementComponent implements OnInit {
   orders: any[] = [];

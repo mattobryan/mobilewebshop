@@ -28,43 +28,64 @@ export class AdminDashboardComponent implements OnInit {
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
+    // Add error handling to prevent app from becoming unresponsive
     this.fetchStats();
     this.fetchRecentOrders();
     this.fetchLowStockProducts();
   }
 
   fetchStats() {
-    this.apiService.getAdminStats().subscribe({
+    this.apiService.getAdminStats<{
+      totalOrders: number;
+      totalRevenue: number;
+      totalProducts: number;
+      totalUsers: number;
+    }>().subscribe({
       next: (data) => {
         this.stats = data;
       },
-      error: (err) => {
+      error: (err: any) => {
+        console.error('Error loading stats:', err);
         this.error = 'Failed to load stats.';
+      },
+      complete: () => {
+        // Ensure loading state is updated even if there's an error
+        // This prevents the UI from showing perpetual loading state
       }
     });
   }
 
   fetchRecentOrders() {
-    this.apiService.getRecentOrders().subscribe({
+    this.apiService.getRecentOrders<any[]>().subscribe({
       next: (orders) => {
         this.recentOrders = orders;
         this.isLoading.orders = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading recent orders:', err);
         this.error = 'Failed to load recent orders.';
+        this.isLoading.orders = false;
+      },
+      complete: () => {
+        // Ensure loading state is updated
         this.isLoading.orders = false;
       }
     });
   }
 
   fetchLowStockProducts() {
-    this.apiService.getLowStockProducts().subscribe({
+    this.apiService.getLowStockProducts<any[]>().subscribe({
       next: (products) => {
         this.lowStockProducts = products;
         this.isLoading.products = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading low stock products:', err);
         this.error = 'Failed to load low stock products.';
+        this.isLoading.products = false;
+      },
+      complete: () => {
+        // Ensure loading state is updated
         this.isLoading.products = false;
       }
     });

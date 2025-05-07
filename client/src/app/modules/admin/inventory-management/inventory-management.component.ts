@@ -1,12 +1,15 @@
-// inventory-management.component.ts
 import { Component, OnInit } from '@angular/core';
 import { InventoryService } from './inventory-service';
 import { debounceTime, Subject } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-inventory-management',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './inventory-management.component.html',
-  styleUrls: ['./inventory-management.component.css']
+  styleUrls: ['./inventory-management.component.scss']
 })
 export class InventoryManagementComponent implements OnInit {
   products: any[] = [];
@@ -26,6 +29,11 @@ export class InventoryManagementComponent implements OnInit {
       this.searchQuery = value;
       this.applyFilters();
     });
+  }
+
+  onSearchInput(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.searchInputChanged.next(target.value);
   }
 
   fetchProducts(): void {

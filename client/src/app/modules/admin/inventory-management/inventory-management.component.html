@@ -3,7 +3,7 @@
     <h2 class="text-2xl font-bold mb-2">Inventory Management</h2>
   
     <div class="grid md:grid-cols-4 gap-4">
-      <input type="text" class="input" placeholder="Search by name..." (input)="searchInputChanged.next($event.target.value)">
+      <input type="text" class="input" placeholder="Search by name..." (input)="onSearchInput($event)">
   
       <select class="input" [(ngModel)]="filterByCategory" (change)="applyFilters()">
         <option value="">All Categories</option>
@@ -39,4 +39,3 @@
       </div>
     </div>
   </div>
-  

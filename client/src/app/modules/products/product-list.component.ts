@@ -4,6 +4,9 @@ import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
+import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
 
 interface Product {
   _id: string;
@@ -34,8 +37,11 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
+    private authService: AuthService,
+    private router: Router,
     private cartService: CartService,
-    private authService: AuthService
+    private snackBar: MatSnackBar
+
   ) { }
 
   ngOnInit(): void {
@@ -49,14 +55,13 @@ export class ProductListComponent implements OnInit {
     this.apiService.get<any>('products').subscribe({
       next: (response) => {
         this.loading = false;
-        // Handle the API response structure which includes data.products
+
         if (response && response.data && response.data.products) {
           this.products = response.data.products;
         } else {
-          // If the response structure is different, try to use it directly
           this.products = Array.isArray(response) ? response : [];
         }
-        
+
         if (this.products.length === 0) {
           this.error = 'No products found in the database. Please make sure you have imported the data.';
         }
@@ -69,8 +74,21 @@ export class ProductListComponent implements OnInit {
     });
   }
 
-  addToCart(product: any): void {
-    this.cartService.addToCart(product);
+  addToCart(product: Product): void {
+    if (!this.authService.isLoggedIn()) {
+      // Show a snack bar message
+      this.snackBar.open('Please log in to add items to your cart.', 'Login', {
+        duration: 3000,
+      });
+  
+      // Redirect to login after a slight delay to allow reading the toast
+      setTimeout(() => this.router.navigate(['/auth/login']), 1000);
+    } else {
+      this.cartService.addToCart(product);
+      this.snackBar.open(`${product.name} added to cart!`, 'Close', {
+        duration: 3000,
+      });
+    }
   }
 
   isLoggedIn(): boolean {
@@ -78,6 +96,7 @@ export class ProductListComponent implements OnInit {
   }
 
   isAdmin(): boolean {
-    return this.authService.isAdmin();
+    return this.authService.getUserRole() === 'admin';
   }
 }
+

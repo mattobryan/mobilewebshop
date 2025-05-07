@@ -1,0 +1,251 @@
+// Variables
+$primary-color: #007bff;
+$secondary-color: #6c757d;
+$danger-color: #dc3545;
+$light-gray: #f8f9fa;
+$border-color: #dee2e6;
+@use 'sass:color';
+
+.cart-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  
+  h2 {
+    margin: 0;
+    color: #333;
+  }
+}
+
+.empty-cart {
+  text-align: center;
+  padding: 40px;
+  background-color: $light-gray;
+  border-radius: 8px;
+  
+  p {
+    margin-bottom: 20px;
+    color: #666;
+    font-size: 18px;
+  }
+  
+  button {
+    padding: 10px 20px;
+    background-color: $primary-color;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+}
+
+.cart-items {
+  margin-bottom: 30px;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid $border-color;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.item-image {
+  width: 80px;
+  height: 80px;
+  margin-right: 15px;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+}
+
+.item-details {
+  flex: 1;
+  
+  .item-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 16px;
+  }
+  
+  .item-price {
+    color: #666;
+  }
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  margin: 0 20px;
+  
+  button {
+    width: 30px;
+    height: 30px;
+    background-color: $secondary-color;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    
+    &:hover {
+      background-color: ($secondary-color, 5%);
+    }
+  }
+  
+  input {
+    width: 50px;
+    height: 30px;
+    text-align: center;
+    margin: 0 10px;
+    border: 1px solid $border-color;
+    border-radius: 4px;
+  }
+}
+
+.item-total {
+  font-weight: bold;
+  width: 100px;
+  text-align: right;
+}
+
+.remove-item {
+  margin-left: 20px;
+  
+  button {
+    background: none;
+    border: none;
+    color: $danger-color;
+    cursor: pointer;
+    
+    &:hover {
+      color: color.adjust($danger-color, $lightness: 10%);
+    }
+  }
+}
+
+.cart-summary {
+  background-color: $light-gray;
+  padding: 20px;
+  border-radius: 8px;
+  
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    
+    &.total {
+      font-weight: bold;
+      font-size: 18px;
+      padding-top: 10px;
+      margin-top: 10px;
+      border-top: 1px solid $border-color;
+    }
+  }
+}
+
+.cart-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  
+  button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    
+    &.clear-cart {
+      background-color: $light-gray;
+      color: $secondary-color;
+      border: 1px solid $border-color;
+      
+      &:hover {
+        background-color: color.adjust($light-gray, $lightness: 5%);
+      }
+    }
+    
+    &.checkout {
+      background-color: $primary-color;
+      color: white;
+      
+      &:hover {
+        background-color: color.adjust($primary-color, $lightness: 5%);
+      }
+      
+      &:disabled {
+        background-color: color.adjust($primary-color,$lightness: 25%);
+        cursor: not-allowed;
+      }
+    }
+    
+    &.continue-shopping {
+      background-color: $secondary-color;
+      color: white;
+      
+      &:hover {
+        background-color: color.adjust($danger-color, $lightness: 5%);
+      }
+    }
+  }
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .item-image {
+    margin-bottom: 10px;
+  }
+  
+  .quantity-controls {
+    margin: 10px 0;
+  }
+  
+  .item-total {
+    width: 100%;
+    text-align: left;
+    margin-top: 10px;
+  }
+  
+  .remove-item {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+  
+  .cart-actions {
+    flex-direction: column;
+    gap: 10px;
+    
+    button {
+      width: 100%;
+    }
+  }
+}

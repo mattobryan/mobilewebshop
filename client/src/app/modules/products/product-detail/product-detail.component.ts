@@ -189,6 +189,12 @@ export class ProductDetailComponent implements OnInit {
   }
 
   addToCart(product: any): void {
-    this.cartService.addToCart(product);
+    if (!this.authService.isLoggedIn()) {
+      // If the user is not logged in, redirect them to the login page
+      this.router.navigate(['/auth/auth']);
+    } else {
+      // If the user is logged in, proceed to add the product to the cart
+      this.cartService.addToCart(product);
+    }
   }
 }

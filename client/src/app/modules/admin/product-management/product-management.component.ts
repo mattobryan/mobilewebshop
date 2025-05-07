@@ -1,15 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-product-management',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './product-management.component.html',
-  styleUrls: ['./product-management.component.css']
+  styleUrls: ['./product-management.component.scss']
 })
 export class ProductManagementComponent implements OnInit {
-  products = [];
-  filteredProducts = [];
+  products: any[] = [];
+  filteredProducts: any[] = [];
   searchQuery = '';
   categoryFilter = 'all';
   stockFilter = 'all';
@@ -17,7 +21,7 @@ export class ProductManagementComponent implements OnInit {
   error = '';
   successMessage = '';
   showDeleteModal = false;
-  productToDelete = null;
+  productToDelete: any = null;
   isDeleting = false;
 
   constructor(private apiService: ApiService, private router: Router) {}
@@ -28,7 +32,7 @@ export class ProductManagementComponent implements OnInit {
 
   loadProducts(): void {
     this.apiService.get('products').subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.products = response;
         this.filteredProducts = [...this.products];
         this.isLoading = false;
@@ -54,7 +58,7 @@ export class ProductManagementComponent implements OnInit {
     });
   }
 
-  deleteProduct(product): void {
+  deleteProduct(product: any): void {
     this.showDeleteModal = true;
     this.productToDelete = product;
   }

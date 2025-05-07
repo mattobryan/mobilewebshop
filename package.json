@@ -10,6 +10,7 @@
     "split-mongodb-data": "node split-mongodb-data.js"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "^19.2.11",
     "@types/express-validator": "^2.20.33",
     "@types/helmet": "^0.0.48",
     "@types/morgan": "^1.9.9",
@@ -20,6 +21,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@abacritt/angularx-social-login": "^2.4.0",
     "@angular/animations": "^19.2.8",
     "@angular/ssr": "^19.2.10",
     "@types/nodemailer": "^6.4.17",

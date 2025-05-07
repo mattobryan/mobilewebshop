@@ -29,16 +29,31 @@ export class CartService {
    * Load cart items from localStorage
    */
   private loadCart(): void {
-    // This method should only be called in browser environment
-    const storedCart = localStorage?.getItem(this.CART_STORAGE_KEY);
-    if (storedCart) {
-      try {
-        const cartItems = JSON.parse(storedCart);
-        this.cartItemsSubject.next(cartItems);
-      } catch (error) {
-        console.error('Error parsing cart data from localStorage:', error);
-        this.cartItemsSubject.next([]);
+    try {
+      // This method should only be called in browser environment
+      const storedCart = localStorage?.getItem(this.CART_STORAGE_KEY);
+      if (storedCart) {
+        try {
+          const cartItems = JSON.parse(storedCart);
+          // Validate cart items structure to prevent errors
+          if (Array.isArray(cartItems)) {
+            this.cartItemsSubject.next(cartItems);
+          } else {
+            console.error('Invalid cart data format, resetting cart');
+            this.cartItemsSubject.next([]);
+            localStorage.removeItem(this.CART_STORAGE_KEY);
+          }
+        } catch (error) {
+          console.error('Error parsing cart data from localStorage:', error);
+          this.cartItemsSubject.next([]);
+          // Clear invalid data
+          localStorage.removeItem(this.CART_STORAGE_KEY);
+        }
       }
+    } catch (error) {
+      console.error('Error loading cart:', error);
+      // Prevent app from becoming unresponsive due to cart errors
+      this.cartItemsSubject.next([]);
     }
   }
 
@@ -46,10 +61,16 @@ export class CartService {
    * Save cart items to localStorage
    */
   private saveCart(cartItems: CartItem[]): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.CART_STORAGE_KEY, JSON.stringify(cartItems));
+    try {
+      if (isPlatformBrowser(this.platformId)) {
+        localStorage.setItem(this.CART_STORAGE_KEY, JSON.stringify(cartItems));
+      }
+      this.cartItemsSubject.next(cartItems);
+    } catch (error) {
+      console.error('Error saving cart:', error);
+      // If saving fails, at least update the subject
+      this.cartItemsSubject.next(cartItems);
     }
-    this.cartItemsSubject.next(cartItems);
   }
 
   /**
@@ -130,10 +151,26 @@ export class CartService {
    */
   getCartItemCount(): Observable<number> {
     return new Observable<number>(observer => {
-      this.cartItems$.subscribe(items => {
-        const count = items.reduce((total, item) => total + item.quantity, 0);
-        observer.next(count);
+      const subscription = this.cartItems$.subscribe({
+        next: items => {
+          try {
+            const count = items.reduce((total, item) => total + item.quantity, 0);
+            observer.next(count);
+          } catch (error) {
+            console.error('Error calculating cart count:', error);
+            observer.next(0);
+          }
+        },
+        error: err => {
+          console.error('Error in cart items subscription:', err);
+          observer.next(0);
+        }
       });
+      
+      // Return teardown logic
+      return () => {
+        subscription.unsubscribe();
+      };
     });
   }
 
@@ -142,10 +179,26 @@ export class CartService {
    */
   getCartTotal(): Observable<number> {
     return new Observable<number>(observer => {
-      this.cartItems$.subscribe(items => {
-        const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        observer.next(total);
+      const subscription = this.cartItems$.subscribe({
+        next: items => {
+          try {
+            const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            observer.next(total);
+          } catch (error) {
+            console.error('Error calculating cart total:', error);
+            observer.next(0);
+          }
+        },
+        error: err => {
+          console.error('Error in cart items subscription:', err);
+          observer.next(0);
+        }
       });
+      
+      // Return teardown logic
+      return () => {
+        subscription.unsubscribe();
+      };
     });
   }
 }

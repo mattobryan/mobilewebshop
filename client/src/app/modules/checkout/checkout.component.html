@@ -1,0 +1,72 @@
+<div class="checkout-container" [formGroup]="checkoutForm">
+    <h2>Checkout</h2>
+  
+    <!-- Error message -->
+    <div *ngIf="error" class="alert error-alert">{{ error }}</div>
+  
+    <!-- Shipping Info -->
+    <div formGroupName="shippingInfo" class="form-section">
+      <h3>Shipping Information</h3>
+      <div class="form-grid">
+        <input formControlName="name" placeholder="Full Name" />
+        <input formControlName="street" placeholder="Street Address" />
+        <input formControlName="city" placeholder="City" />
+        <input formControlName="postalCode" placeholder="Postal Code" />
+        <input formControlName="country" placeholder="Country" />
+      </div>
+    </div>
+  
+    <!-- Payment Method Selection -->
+    <div class="form-section">
+      <h3>Payment Method</h3>
+      <div class="payment-options">
+        <label>
+          <input type="radio" value="credit_card" formControlName="paymentMethod" />
+          Credit Card
+        </label>
+        <label>
+          <input type="radio" value="paypal" formControlName="paymentMethod" />
+          PayPal
+        </label>
+        <label>
+          <input type="radio" value="stripe" formControlName="paymentMethod" />
+          Stripe
+        </label>
+      </div>
+    </div>
+  
+    <!-- Credit Card Info -->
+    <div
+      *ngIf="checkoutForm.get('paymentMethod')?.value === 'credit_card'"
+      formGroupName="paymentDetails"
+      class="form-section"
+    >
+      <h3>Credit Card Details</h3>
+      <div class="form-grid">
+        <input formControlName="cardNumber" placeholder="Card Number" />
+        <input formControlName="expiryDate" placeholder="Expiry Date (MM/YY)" />
+        <input formControlName="cvv" placeholder="CVV" />
+      </div>
+    </div>
+  
+    <!-- Cart Summary -->
+    <div class="cart-summary">
+      <h3>Order Summary</h3>
+      <ul>
+        <li *ngFor="let item of cartItems">
+          {{ item.name }} × {{ item.quantity }} = ${{ item.price * item.quantity }}
+        </li>
+      </ul>
+      <div class="total">Total: ${{ totalPrice }}</div>
+    </div>
+  
+    <!-- Submit Button -->
+    <button
+      class="submit-btn"
+      [disabled]="isSubmitting || checkoutForm.invalid"
+      (click)="submitOrder()"
+    >
+      {{ isSubmitting ? 'Placing Order...' : 'Place Order' }}
+    </button>
+  </div>
+  

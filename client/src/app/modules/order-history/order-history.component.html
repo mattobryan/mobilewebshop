@@ -1,0 +1,48 @@
+<div class="order-card">
+    <div class="order-header">
+      <div class="order-info">
+        <h3>Order #{{ order._id.substring(order._id.length - 8) }}</h3>
+        <p class="order-date">{{ order.createdAt | date:'medium' }}</p>
+      </div>
+      <div class="order-status" [ngClass]="getStatusClass(order.status)">
+        {{ order.status | titlecase }}
+      </div>
+    </div>
+  
+    <div class="order-items">
+      <div class="order-item" *ngFor="let item of order.items">
+        <div class="item-quantity">{{ item.quantity }}x</div>
+        <div class="item-name">{{ item.name }}</div>
+        <div class="item-price">\${{ item.price.toFixed(2) }}</div>
+      </div>
+    </div>
+  
+    <div class="order-footer">
+      <div class="order-details">
+        <div class="detail-row">
+          <span>Payment Method:</span>
+          <span>{{ getPaymentMethodDisplay(order.paymentMethod) }}</span>
+        </div>
+        <div class="detail-row">
+          <span>Payment Status:</span>
+          <span [ngClass]="getPaymentStatusClass(order.paymentStatus)">
+            {{ order.paymentStatus | titlecase }}
+          </span>
+        </div>
+        <div class="detail-row">
+          <span>Shipping Address:</span>
+          <span>{{ formatAddress(order.shippingAddress) }}</span>
+        </div>
+      </div>
+  
+      <div class="order-total">
+        <span>Total:</span>
+        <span class="total-amount">\${{ order.totalAmount.toFixed(2) }}</span>
+      </div>
+  
+      <div class="order-actions" *ngIf="order.status === 'pending' || order.status === 'processing'">
+        <button class="cancel-btn" (click)="cancel.emit(order._id)">Cancel Order</button>
+      </div>
+    </div>
+  </div>
+  
